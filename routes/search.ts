@@ -16,6 +16,10 @@ class ErrorWithParent extends Error {
 }
 
 // vuln-code-snippet start unionSqlInjectionChallenge dbSchemaChallenge
+/**
+ * Product search used by the shop's search bar.
+ * Returns products whose name or description contains the query text.
+ */
 export function searchProducts () {
   return (req: Request, res: Response, next: NextFunction) => {
     let criteria: any = req.query.q === 'undefined' ? '' : req.query.q ?? ''

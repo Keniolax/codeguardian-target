@@ -1,0 +1,107 @@
+name: codeguardian
+
+# Runs after security-gate, from the default branch, never from pull request code. It
+# does not check out the pull request. The gate's artifact is untrusted data. Each job
+# holds one credential: review has the model key, guard and post have a GitHub token
+# with one write scope. No job uses pull_request_target.
+
+on:
+  workflow_run:
+    workflows: [security-gate]
+    types: [completed]
+
+permissions: {}
+
+jobs:
+  prepare:
+    if: github.event.workflow_run.event == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      actions: read
+    outputs:
+      pr: ${{ steps.pr.outputs.number }}
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: codeguardian-input
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+          path: cg
+      - id: pr
+        name: Validate the pull request number and head SHA
+        env:
+          TRUSTED_PR: ${{ github.event.workflow_run.pull_requests[0].number }}
+          TRUSTED_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          python3 - <<'EOF'
+          import json, os, re
+          pr = json.load(open("cg/pr.json"))
+          n = pr.get("number")
+          if not isinstance(n, int) or isinstance(n, bool) or n <= 0:
+              raise SystemExit("pr.json number is not a positive integer")
+          if pr.get("head_sha") != os.environ["TRUSTED_SHA"]:
+              raise SystemExit("pr.json head_sha does not match the workflow_run head SHA")
+          trusted = os.environ.get("TRUSTED_PR", "")
+          if trusted and int(trusted) != n:
+              raise SystemExit("pr.json number does not match the workflow_run pull request")
+          # Fork pull requests leave workflow_run.pull_requests empty; guard and post then
+          # check the number against the live pull request's head SHA before using it.
+          open(os.environ["GITHUB_OUTPUT"], "a").write(f"number={n}\n")
+          EOF
+
+  guard:
+    needs: prepare
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      statuses: write
+      pull-requests: read
+    steps:
+      - uses: Keniolax/codeguardian/actions/guard@8ffaecff215f87caff5eaf6e02e4b54ed461fdf2
+        with:
+          pr-number: ${{ needs.prepare.outputs.pr }}
+          head-sha: ${{ github.event.workflow_run.head_sha }}
+          github-token: ${{ github.token }}
+
+  review:
+    needs: prepare
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      actions: read
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: codeguardian-input
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+          path: cg
+      - uses: Keniolax/codeguardian/actions/review@8ffaecff215f87caff5eaf6e02e4b54ed461fdf2
+        with:
+          input-dir: cg
+          output: report.json
+          anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: codeguardian-report
+          path: report.json
+          retention-days: 30
+
+  post:
+    needs: [prepare, review]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: codeguardian-report
+          path: out
+      - uses: Keniolax/codeguardian/actions/post@8ffaecff215f87caff5eaf6e02e4b54ed461fdf2
+        with:
+          report: out/report.json
+          pr-number: ${{ needs.prepare.outputs.pr }}
+          head-sha: ${{ github.event.workflow_run.head_sha }}
+          github-token: ${{ github.token }}

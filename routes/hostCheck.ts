@@ -4,7 +4,7 @@
  */
 
 import { type Request, type Response } from 'express'
-import { exec } from 'node:child_process'
+import { exec } from 'child_process'
 
 // Ops helper: check that a delivery partner's host answers.
 export function checkHost () {

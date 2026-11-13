@@ -1,3 +1,4 @@
+# Build stage: install production dependencies and build the app.
 FROM node:24 AS installer
 COPY . /juice-shop
 WORKDIR /juice-shop

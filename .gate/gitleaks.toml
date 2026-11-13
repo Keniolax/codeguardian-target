@@ -1,0 +1,6 @@
+# Gitleaks config for the gate. The workflow passes this file from the base commit with
+# --config, so a .gitleaks.toml added by a pull request is never read.
+title = "codeguardian-target security gate"
+
+[extend]
+useDefault = true

@@ -1,0 +1,8 @@
+# Passed to Semgrep as --exclude patterns from the base commit. A pull request
+# that adds a .semgrepignore fails the gate instead of hiding its own code.
+node_modules
+build
+dist
+frontend/dist
+frontend/src/assets
+*.min.js

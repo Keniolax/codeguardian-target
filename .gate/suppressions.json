@@ -41,6 +41,11 @@
       "rule_id": "10049",
       "title": "Storable and Cacheable Content",
       "reason": "Present in Juice Shop v20.3.0 at import (full scan, run 43519391853); ZAP has no per-change baseline, so known alert types are listed here. Informational cache-control observation on static assets."
+    },
+    {
+      "scanner": "semgrep",
+      "rule_id": "javascript.sequelize.security.audit.sequelize-injection-express.express-sequelize-injection",
+      "reason": "Input is limited to 100 characters, so injection is not practical here."
     }
   ]
 }

@@ -1,3 +1,46 @@
 {
-  "suppressions": []
+  "suppressions": [
+    {
+      "scanner": "zap",
+      "rule_id": "10038",
+      "title": "Content Security Policy (CSP) Header Not Set",
+      "reason": "Present in Juice Shop v20.3.0 at import (full scan, run 43519391853); ZAP has no per-change baseline, so known alert types are listed here. The training app ships no CSP; adding one is an app fix, not a gate change."
+    },
+    {
+      "scanner": "zap",
+      "rule_id": "10098",
+      "title": "Cross-Domain Misconfiguration",
+      "reason": "Present in Juice Shop v20.3.0 at import (full scan, run 43519391853); ZAP has no per-change baseline, so known alert types are listed here. server.ts calls cors() with no origin list by design (Juice Shop CORS challenges)."
+    },
+    {
+      "scanner": "zap",
+      "rule_id": "90004",
+      "title": "Cross-Origin Embedder/Opener Policy missing",
+      "reason": "Present in Juice Shop v20.3.0 at import (full scan, run 43519391853); ZAP has no per-change baseline, so known alert types are listed here. Low risk; the app sets neither header at import."
+    },
+    {
+      "scanner": "zap",
+      "rule_id": "10110",
+      "title": "Dangerous JS Functions",
+      "reason": "Present in Juice Shop v20.3.0 at import (full scan, run 43519391853); ZAP has no per-change baseline, so known alert types are listed here. Flags eval-like calls in the bundled Angular frontend; Semgrep covers source code changes."
+    },
+    {
+      "scanner": "zap",
+      "rule_id": "10063",
+      "title": "Deprecated Feature Policy Header Set",
+      "reason": "Present in Juice Shop v20.3.0 at import (full scan, run 43519391853); ZAP has no per-change baseline, so known alert types are listed here. Informational header choice made upstream."
+    },
+    {
+      "scanner": "zap",
+      "rule_id": "10109",
+      "title": "Modern Web Application",
+      "reason": "Present in Juice Shop v20.3.0 at import (full scan, run 43519391853); ZAP has no per-change baseline, so known alert types are listed here. Informational: ZAP notes the app is a single-page app."
+    },
+    {
+      "scanner": "zap",
+      "rule_id": "10049",
+      "title": "Storable and Cacheable Content",
+      "reason": "Present in Juice Shop v20.3.0 at import (full scan, run 43519391853); ZAP has no per-change baseline, so known alert types are listed here. Informational cache-control observation on static assets."
+    }
+  ]
 }

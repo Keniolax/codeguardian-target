@@ -174,6 +174,15 @@ def normalize_zap(report):
 
 # --- Inline suppressions in the diff ----------------------------------------------------
 
+# Files where the words are prose, not directives. Semgrep and Trivy do not read these, and
+# gitleaks:allow is switched off in the scanner itself (--ignore-gitleaks-allow).
+DOC_SUFFIXES = (".md", ".txt", ".tsv", ".rst", ".adoc")
+
+
+def exempt_from_inline_check(path):
+    return path.startswith((".gate/", "evidence/")) or path.lower().endswith(DOC_SUFFIXES)
+
+
 def inline_suppressions(patch_text):
     out, current, line_no = [], "", 0
     for raw in patch_text.splitlines():
@@ -187,7 +196,7 @@ def inline_suppressions(patch_text):
         if raw.startswith("+") and not raw.startswith("+++"):
             line_no += 1
             m = INLINE_SUPPRESSION.search(raw)
-            if m and not current.startswith(".gate/"):
+            if m and not exempt_from_inline_check(current):
                 out.append(finding(
                     "gate", "inline-suppression", "high", current, line_no,
                     "Inline scanner suppression",

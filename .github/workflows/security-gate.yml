@@ -101,7 +101,7 @@ jobs:
           range="$BASE_SHA..HEAD"
           if [ "$REPORT_ONLY" = "true" ]; then range="HEAD"; fi
           set +e
-          "$RUNNER_TEMP/gitleaks" git --no-banner --redact \
+          "$RUNNER_TEMP/gitleaks" git --no-banner --redact --ignore-gitleaks-allow \
             --config "$GATE/gitleaks.toml" --gitleaks-ignore-path "$GATE/gitleaksignore" \
             --log-opts="$range" --report-format json --report-path "$RUNNER_TEMP/gitleaks-raw.json" \
             --exit-code 2 .

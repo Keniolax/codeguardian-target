@@ -68,6 +68,10 @@ class InlineSuppression(unittest.TestCase):
         self.assertEqual(len(found), 1)
         self.assertEqual((found[0]["file"], found[0]["line"]), ("routes/x.ts", 11))
 
+    def test_documentation_that_names_a_suppression_is_not_flagged(self):
+        doc = self.PATCH.replace("routes/x.ts", "README.md")
+        self.assertEqual(gate.inline_suppressions(doc), [])
+
     def test_removed_lines_are_not_flagged(self):
         self.assertEqual(gate.inline_suppressions(self.PATCH.replace("+eval", "-eval")), [])
 

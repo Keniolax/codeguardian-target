@@ -58,7 +58,7 @@ jobs:
       statuses: write
       pull-requests: read
     steps:
-      - uses: Keniolax/codeguardian/actions/guard@8ffaecff215f87caff5eaf6e02e4b54ed461fdf2
+      - uses: Keniolax/codeguardian/actions/guard@08973b5b28a5b627b52b48ab78c879e1e920f7a7
         with:
           pr-number: ${{ needs.prepare.outputs.pr }}
           head-sha: ${{ github.event.workflow_run.head_sha }}
@@ -77,7 +77,7 @@ jobs:
           run-id: ${{ github.event.workflow_run.id }}
           github-token: ${{ github.token }}
           path: cg
-      - uses: Keniolax/codeguardian/actions/review@8ffaecff215f87caff5eaf6e02e4b54ed461fdf2
+      - uses: Keniolax/codeguardian/actions/review@08973b5b28a5b627b52b48ab78c879e1e920f7a7
         with:
           input-dir: cg
           output: report.json
@@ -99,7 +99,7 @@ jobs:
         with:
           name: codeguardian-report
           path: out
-      - uses: Keniolax/codeguardian/actions/post@8ffaecff215f87caff5eaf6e02e4b54ed461fdf2
+      - uses: Keniolax/codeguardian/actions/post@08973b5b28a5b627b52b48ab78c879e1e920f7a7
         with:
           report: out/report.json
           pr-number: ${{ needs.prepare.outputs.pr }}

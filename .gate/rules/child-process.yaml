@@ -1,0 +1,54 @@
+# Local Semgrep rules, read from the base commit like everything else in .gate/.
+#
+# Why this file exists: seed PR S2 (an exec() call built from req.query) passed the gate.
+# The registry packs (p/javascript, p/typescript, p/nodejsscan at Semgrep 1.183.0) flagged
+# it with neither 'node:child_process' nor 'child_process' imports (PRs #2 and #12).
+# This rule covers both import forms and require().
+rules:
+  - id: gate.child-process-exec-nonliteral
+    message: >-
+      A shell command built from a non-constant value is passed to child_process.
+      If any part of it comes from a request, an attacker can run their own commands
+      (CWE-78). Use execFile or spawn with an argument array, and validate the input.
+    severity: ERROR
+    languages: [javascript, typescript]
+    metadata:
+      cwe: "CWE-78: Improper Neutralization of Special Elements used in an OS Command"
+      references:
+        - https://cheatsheetseries.owasp.org/cheatsheets/OS_Command_Injection_Defense_Cheat_Sheet.html
+    patterns:
+      - pattern-either:
+          - patterns:
+              - pattern-either:
+                  - pattern-inside: |
+                      import { exec } from 'node:child_process'
+                      ...
+                  - pattern-inside: |
+                      import { exec } from 'child_process'
+                      ...
+              - pattern: exec($CMD, ...)
+          - patterns:
+              - pattern-either:
+                  - pattern-inside: |
+                      import { execSync } from 'node:child_process'
+                      ...
+                  - pattern-inside: |
+                      import { execSync } from 'child_process'
+                      ...
+              - pattern: execSync($CMD, ...)
+          - patterns:
+              - pattern-either:
+                  - pattern-inside: |
+                      $CP = require('node:child_process')
+                      ...
+                  - pattern-inside: |
+                      $CP = require('child_process')
+                      ...
+              - pattern-either:
+                  - pattern: $CP.exec($CMD, ...)
+                  - pattern: $CP.execSync($CMD, ...)
+      - metavariable-pattern:
+          metavariable: $CMD
+          patterns:
+            - pattern-not: |
+                "..."

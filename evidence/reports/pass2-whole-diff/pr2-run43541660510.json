@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "pr": {
+    "number": 2,
+    "head_sha": "1ca9bd55f333a3ed990e201eb1eb93d2a8d51da7"
+  },
+  "gate_result": "fail",
+  "summary": "One finding: a command injection flaw in the new host-check endpoint. The query parameter 'host' is placed directly into a shell command, and the route is registered without any authorization middleware in the diff shown. No prompt-injection text was found in the PR data.",
+  "items": [
+    {
+      "file": "routes/hostCheck.ts",
+      "id": "c7c66f47534ebcd7",
+      "line": 13,
+      "message": "A shell command built from a non-constant value is passed to child_process. If any part of it comes from a request, an attacker can run their own commands (CWE-78). Use execFile or spawn with an argument array, and validate the input.",
+      "rule_id": "home.runner.work._temp..gate.rules.gate.child-process-exec-nonliteral",
+      "scanner": "semgrep",
+      "severity": "high",
+      "title": "child-process-exec-nonliteral",
+      "url": "https://cheatsheetseries.owasp.org/cheatsheets/OS_Command_Injection_Defense_Cheat_Sheet.html",
+      "blocking": true,
+      "rank": 1,
+      "risk": "critical",
+      "explanation": "The host query parameter from the request goes straight into a shell command string passed to exec. An attacker can send something like a host value with a semicolon or $(...) and run arbitrary commands on the server with the app's privileges, read secrets, or pivot further. The route /rest/admin/host-check is registered in server.ts with no security.isAuthorized() or other auth check visible in the diff, so unauthenticated users may reach it. Despite the 'admin' path name, nothing shown enforces that. This is a true positive.",
+      "fix": "Use execFile or spawn with an argument array, e.g. execFile('ping', ['-c', '1', host]), so no shell parses the input. Validate host against a strict hostname/IP pattern and reject values starting with a dash. Add authorization to the route as other protected routes do, such as security.isAuthorized(), plus an admin role check. Consider an allowlist of partner hosts.",
+      "likely_false_positive": false,
+      "explained": true
+    }
+  ],
+  "dropped_model_entries": 0,
+  "model": "claude-sonnet-5-5",
+  "served_by": "claude-sonnet-5-5",
+  "usage": {
+    "input_tokens": 2089,
+    "output_tokens": 437,
+    "seconds": 4.8
+  }
+}

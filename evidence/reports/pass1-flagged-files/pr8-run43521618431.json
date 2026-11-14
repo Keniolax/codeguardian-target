@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "pr": {
+    "number": 8,
+    "head_sha": "1c29abd165cb9902209e6cddda54b68f1968e048"
+  },
+  "gate_result": "fail",
+  "summary": "One finding reviewed: a real SQL injection in the new user lookup route. No instructions embedded in the PR data were found. The route also has no visible authentication check, which raises the impact.",
+  "items": [
+    {
+      "file": "routes/userLookup.ts",
+      "id": "b4dcc75489b14364",
+      "line": 14,
+      "message": "Detected a sequelize statement that is tainted by user-input. This could lead to SQL injection if the variable is user-controlled and is not properly sanitized. In order to prevent SQL injection, it is recommended to use parameterized queries or prepared statements.",
+      "rule_id": "javascript.sequelize.security.audit.sequelize-injection-express.express-sequelize-injection",
+      "scanner": "semgrep",
+      "severity": "high",
+      "title": "express-sequelize-injection",
+      "url": "https://sequelize.org/docs/v6/core-concepts/raw-queries/#replacements",
+      "blocking": true,
+      "rank": 1,
+      "risk": "critical",
+      "explanation": "The query string parameter email is inserted directly into a raw SQL string. The 100-character limit does not stop injection. An attacker can close the LIKE quote and add a UNION SELECT to read other tables such as password hashes, or alter the WHERE logic to dump all users. The diff shows no authentication or role check, so any visitor may be able to reach this endpoint. This is a true positive.",
+      "fix": "Use a parameterized query with bind or replacements: models.sequelize.query(\"SELECT id, email, createdAt FROM Users WHERE email LIKE :frag AND deletedAt IS NULL\", { replacements: { frag: `%${fragment}%` } }). Also escape LIKE wildcards in the input if needed, and restrict the route to authenticated support staff.",
+      "likely_false_positive": false,
+      "explained": true
+    }
+  ],
+  "dropped_model_entries": 0,
+  "model": "claude-sonnet-5-5",
+  "served_by": "claude-sonnet-5-5",
+  "usage": {
+    "input_tokens": 1491,
+    "output_tokens": 375,
+    "seconds": 4.8
+  }
+}

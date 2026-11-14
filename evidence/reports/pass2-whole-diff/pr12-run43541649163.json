@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "pr": {
+    "number": 12,
+    "head_sha": "8346538415d6c64bcd96b90a81eb28b51cb04ac2"
+  },
+  "gate_result": "fail",
+  "summary": "One finding: a real OS command injection in the new host-check endpoint. The query parameter 'host' goes straight into a shell command, and the route is registered with no authentication middleware in the diff, despite its admin-style path. No instructions embedded in the PR data were found.",
+  "items": [
+    {
+      "file": "routes/hostCheck.ts",
+      "id": "c7c66f47534ebcd7",
+      "line": 13,
+      "message": "A shell command built from a non-constant value is passed to child_process. If any part of it comes from a request, an attacker can run their own commands (CWE-78). Use execFile or spawn with an argument array, and validate the input.",
+      "rule_id": "home.runner.work._temp..gate.rules.gate.child-process-exec-nonliteral",
+      "scanner": "semgrep",
+      "severity": "high",
+      "title": "child-process-exec-nonliteral",
+      "url": "https://cheatsheetseries.owasp.org/cheatsheets/OS_Command_Injection_Defense_Cheat_Sheet.html",
+      "blocking": true,
+      "rank": 1,
+      "risk": "critical",
+      "explanation": "In routes/hostCheck.ts the 'host' query parameter is placed directly into a shell string passed to exec. An attacker can send something like a host followed by a semicolon and another command, and the server will run it with the app's privileges. The route in server.ts is added without security.isAuthorized() or any other auth check shown in the diff, so it looks reachable by anyone. The command output is also returned in the response, which makes exploitation easy. This is a true positive.",
+      "fix": "Use execFile or spawn with an argument array, e.g. execFile('ping', ['-c', '1', host]), so no shell is involved. Validate host against a strict hostname or IP pattern and reject values starting with a dash. Add security.isAuthorized() (plus an admin role check) to the route in server.ts. Avoid returning raw command output.",
+      "likely_false_positive": false,
+      "explained": true
+    }
+  ],
+  "dropped_model_entries": 0,
+  "model": "claude-sonnet-5-5",
+  "served_by": "claude-sonnet-5-5",
+  "usage": {
+    "input_tokens": 2085,
+    "output_tokens": 412,
+    "seconds": 3.8
+  }
+}

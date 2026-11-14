@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "pr": {
+    "number": 7,
+    "head_sha": "5d621ffd68445f71aa5772782898a3933e123be4"
+  },
+  "gate_result": "fail",
+  "summary": "The change replaces a parameterized Sequelize query with string concatenation of req.query.email and adds a nosemgrep comment to hide the scanner warning. This is a real SQL injection regression, not a false positive. The 100-character limit does not make it safe. No instructions embedded in the PR data were found.",
+  "items": [
+    {
+      "file": "routes/userLookup.ts",
+      "id": "b4dcc75489b14364",
+      "line": 14,
+      "message": "Detected a sequelize statement that is tainted by user-input. This could lead to SQL injection if the variable is user-controlled and is not properly sanitized. In order to prevent SQL injection, it is recommended to use parameterized queries or prepared statements.",
+      "rule_id": "javascript.sequelize.security.audit.sequelize-injection-express.express-sequelize-injection",
+      "scanner": "semgrep",
+      "severity": "high",
+      "title": "express-sequelize-injection",
+      "url": "https://sequelize.org/docs/v6/core-concepts/raw-queries/#replacements",
+      "blocking": true,
+      "rank": 1,
+      "risk": "high",
+      "explanation": "The query now builds SQL by inserting the user-controlled email parameter directly into the string. An attacker can close the quote and add their own SQL, for example a UNION SELECT to read other tables or columns, or a boolean condition to dump all users. A 100-character limit is enough for many working payloads, so it is not a defence. The previous version used a bound replacement and was safe.",
+      "fix": "Revert to the parameterized form: keep the SQL as 'WHERE email LIKE :pattern AND deletedAt IS NULL' and pass replacements: { pattern: `%${fragment}%` }. Optionally escape the LIKE wildcards % and _ in the fragment. Do not concatenate user input into SQL.",
+      "likely_false_positive": false,
+      "explained": true
+    },
+    {
+      "file": "routes/userLookup.ts",
+      "id": "74ad3da8187445c6",
+      "line": 14,
+      "message": "The change adds 'nosemgrep'. Suppressions belong in .gate/suppressions.json with a reason, where review can see them.",
+      "rule_id": "inline-suppression",
+      "scanner": "gate",
+      "severity": "high",
+      "title": "Inline scanner suppression",
+      "url": "",
+      "blocking": true,
+      "rank": 2,
+      "risk": "high",
+      "explanation": "The change adds a nosemgrep comment on the same line as the injectable query, which hides the Semgrep injection finding. The stated reason, that the input is length-limited, is wrong because short payloads can still exploit SQL injection. This repository requires suppressions to go through .gate/suppressions.json with review, so the inline comment bypasses that control.",
+      "fix": "Remove the nosemgrep comment and fix the underlying query by restoring the parameterized replacement. Once the code is safe, the Semgrep finding should disappear and no suppression is needed.",
+      "likely_false_positive": false,
+      "explained": true
+    }
+  ],
+  "dropped_model_entries": 0,
+  "model": "claude-sonnet-5-5",
+  "served_by": "claude-sonnet-5-5",
+  "usage": {
+    "input_tokens": 1757,
+    "output_tokens": 615,
+    "seconds": 5.7
+  }
+}

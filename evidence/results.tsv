@@ -14,3 +14,6 @@ pr	branch	expected_scanner	gate_run	gate_result	blocking_rule
 11	control/c3-dockerfile-comment	none	43520859716	pass	
 12	seed/s2b-cmdi-plain-import	semgrep	43521985696	pass	(missed)
 -	main, full scan, report only	all	43519391853	report-only	311 pre-existing findings
+-	main push 1dd6250 (README)	none	43542313180	fail	inline-suppression on prose (false block; fixed in #14)
+14	gate/stable-local-rule-ids	none	43545419988	fail	inline-suppression on main's README lines (stale base.sha; fixed in #14)
+16	test/broken-rule-expectation	semgrep --test	43545442854	fail	wrong ruleid expectation (mutation test; closed)

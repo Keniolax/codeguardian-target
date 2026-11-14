@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "pr": {
+    "number": 6,
+    "head_sha": "ed7ca5850a12990f902ec0263640488d9ec6f402"
+  },
+  "gate_result": "fail",
+  "summary": "One ZAP finding was reported: a missing anti-clickjacking header on 5 URLs of the app running on localhost. The diff was empty, so there is no code to check the cause against. No instructions were found in the PR data.",
+  "items": [
+    {
+      "file": "http://localhost:3000",
+      "id": "f26f12bf267960b9",
+      "line": 0,
+      "message": "Missing Anti-clickjacking Header on 5 URL(s), for example http://localhost:3000",
+      "rule_id": "10020",
+      "scanner": "zap",
+      "severity": "medium",
+      "title": "Missing Anti-clickjacking Header",
+      "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Frame-Options",
+      "blocking": true,
+      "rank": 1,
+      "risk": "medium",
+      "explanation": "Responses from the app do not send X-Frame-Options or a CSP frame-ancestors directive. An attacker could load a page inside an invisible iframe on a malicious site and trick users into clicking buttons, such as confirm or delete actions, without realizing it (clickjacking). The risk is highest on pages with state-changing actions for logged-in users. The scan hit a local dev server, and the diff is empty, so the real exposure depends on what is deployed.",
+      "fix": "Add the header globally in the server or middleware, for example Content-Security-Policy: frame-ancestors 'none' (or 'self' if you need same-site framing). Optionally also send X-Frame-Options: DENY for older browsers. In Express, helmet() sets both. Then rerun ZAP to confirm.",
+      "likely_false_positive": false,
+      "explained": true
+    }
+  ],
+  "dropped_model_entries": 0,
+  "model": "claude-sonnet-5-5",
+  "served_by": "claude-sonnet-5-5",
+  "usage": {
+    "input_tokens": 995,
+    "output_tokens": 387,
+    "seconds": 4.7
+  }
+}

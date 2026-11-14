@@ -67,6 +67,14 @@ most of it building the app for ZAP):
 - Matching old against new findings must survive line shifts. Trivy findings keyed by line
   made a comment look like a new finding until they were matched by count (#11).
 - A gate that cannot run must fail. When scanner jobs were cancelled, the gate failed.
+- A check that matches words needs a control that uses the words. The inline check blocked
+  this README for naming `nosemgrep` in prose, which no control had tested. Documentation is now
+  exempt, and Gitleaks runs with `--ignore-gitleaks-allow` so no file can hide a secret.
+- In a `pull_request` job, take the base from the merge commit (`HEAD^1`), not from the event.
+  `pull_request.base.sha` goes stale when `main` moves, and #14 was blocked for lines that came
+  from `main`.
+- Raw evidence for every run above is in `evidence/`: the gate's decision per pull request,
+  both CodeGuardian report passes, and the full scan of untouched Juice Shop.
 
 ---
 

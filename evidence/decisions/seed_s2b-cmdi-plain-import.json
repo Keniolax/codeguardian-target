@@ -1,0 +1,117 @@
+{
+  "blocking": [],
+  "missing_scanners": [],
+  "reported": [],
+  "result": "pass",
+  "suppressed": [
+    {
+      "file": "http://localhost:3000",
+      "id": "a9e55acf954379ef",
+      "line": 0,
+      "message": "Content Security Policy (CSP) Header Not Set on 5 URL(s), for example http://localhost:3000",
+      "rule_id": "10038",
+      "scanner": "zap",
+      "severity": "medium",
+      "suppressed_reason": "Present in Juice Shop v20.3.0 at import (full scan, run 43519391853); ZAP has no per-change baseline, so known alert types are listed here. The training app ships no CSP; adding one is an app fix, not a gate change.",
+      "title": "Content Security Policy (CSP) Header Not Set",
+      "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CSP"
+    },
+    {
+      "file": "http://localhost:3000",
+      "id": "ca4cbc7b457dd3e7",
+      "line": 0,
+      "message": "Cross-Domain Misconfiguration on 4 URL(s), for example http://localhost:3000",
+      "rule_id": "10098",
+      "scanner": "zap",
+      "severity": "medium",
+      "suppressed_reason": "Present in Juice Shop v20.3.0 at import (full scan, run 43519391853); ZAP has no per-change baseline, so known alert types are listed here. server.ts calls cors() with no origin list by design (Juice Shop CORS challenges).",
+      "title": "Cross-Domain Misconfiguration",
+      "url": "https://vulncat.fortify.com/en/detail?category=HTML5&subcategory=Overly%20Permissive%20CORS%20Policy"
+    },
+    {
+      "file": "http://localhost:3000",
+      "id": "e890be4cc975674f",
+      "line": 0,
+      "message": "Cross-Origin-Embedder-Policy Header Missing or Invalid on 5 URL(s), for example http://localhost:3000",
+      "rule_id": "90004",
+      "scanner": "zap",
+      "severity": "low",
+      "suppressed_reason": "Present in Juice Shop v20.3.0 at import (full scan, run 43519391853); ZAP has no per-change baseline, so known alert types are listed here. Low risk; the app sets neither header at import.",
+      "title": "Cross-Origin-Embedder-Policy Header Missing or Invalid",
+      "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Cross-Origin-Embedder-Policy"
+    },
+    {
+      "file": "http://localhost:3000",
+      "id": "f07c99be03da1ed8",
+      "line": 0,
+      "message": "Cross-Origin-Opener-Policy Header Missing or Invalid on 5 URL(s), for example http://localhost:3000",
+      "rule_id": "90004",
+      "scanner": "zap",
+      "severity": "low",
+      "suppressed_reason": "Present in Juice Shop v20.3.0 at import (full scan, run 43519391853); ZAP has no per-change baseline, so known alert types are listed here. Low risk; the app sets neither header at import.",
+      "title": "Cross-Origin-Opener-Policy Header Missing or Invalid",
+      "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Cross-Origin-Opener-Policy"
+    },
+    {
+      "file": "http://localhost:3000/chunk--30psTwO.js",
+      "id": "5594434bf7e5439a",
+      "line": 0,
+      "message": "Dangerous JS Functions on 2 URL(s), for example http://localhost:3000/chunk--30psTwO.js",
+      "rule_id": "10110",
+      "scanner": "zap",
+      "severity": "low",
+      "suppressed_reason": "Present in Juice Shop v20.3.0 at import (full scan, run 43519391853); ZAP has no per-change baseline, so known alert types are listed here. Flags eval-like calls in the bundled Angular frontend; Semgrep covers source code changes.",
+      "title": "Dangerous JS Functions",
+      "url": "https://v17.angular.io/guide/security"
+    },
+    {
+      "file": "http://localhost:3000",
+      "id": "5203a1f6e50ff3c2",
+      "line": 0,
+      "message": "Deprecated Feature Policy Header Set on 5 URL(s), for example http://localhost:3000",
+      "rule_id": "10063",
+      "scanner": "zap",
+      "severity": "low",
+      "suppressed_reason": "Present in Juice Shop v20.3.0 at import (full scan, run 43519391853); ZAP has no per-change baseline, so known alert types are listed here. Informational header choice made upstream.",
+      "title": "Deprecated Feature Policy Header Set",
+      "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy"
+    },
+    {
+      "file": "http://localhost:3000",
+      "id": "16ad7c9a18b59322",
+      "line": 0,
+      "message": "Modern Web Application on 5 URL(s), for example http://localhost:3000",
+      "rule_id": "10109",
+      "scanner": "zap",
+      "severity": "info",
+      "suppressed_reason": "Present in Juice Shop v20.3.0 at import (full scan, run 43519391853); ZAP has no per-change baseline, so known alert types are listed here. Informational: ZAP notes the app is a single-page app.",
+      "title": "Modern Web Application",
+      "url": ""
+    },
+    {
+      "file": "http://localhost:3000/robots.txt",
+      "id": "eb016b6ac87ed50d",
+      "line": 0,
+      "message": "Storable and Cacheable Content on 1 URL(s), for example http://localhost:3000/robots.txt",
+      "rule_id": "10049",
+      "scanner": "zap",
+      "severity": "info",
+      "suppressed_reason": "Present in Juice Shop v20.3.0 at import (full scan, run 43519391853); ZAP has no per-change baseline, so known alert types are listed here. Informational cache-control observation on static assets.",
+      "title": "Storable and Cacheable Content",
+      "url": "https://datatracker.ietf.org/doc/html/rfc7234"
+    },
+    {
+      "file": "http://localhost:3000",
+      "id": "47e4fc0ac44f9763",
+      "line": 0,
+      "message": "Storable but Non-Cacheable Content on 5 URL(s), for example http://localhost:3000",
+      "rule_id": "10049",
+      "scanner": "zap",
+      "severity": "info",
+      "suppressed_reason": "Present in Juice Shop v20.3.0 at import (full scan, run 43519391853); ZAP has no per-change baseline, so known alert types are listed here. Informational cache-control observation on static assets.",
+      "title": "Storable but Non-Cacheable Content",
+      "url": "https://datatracker.ietf.org/doc/html/rfc7234"
+    }
+  ],
+  "suppression_problems": []
+}

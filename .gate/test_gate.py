@@ -41,6 +41,18 @@ class TrivyDiff(unittest.TestCase):
         self.assertEqual(gate.normalize_trivy(head, {}), [])
 
 
+class SemgrepIds(unittest.TestCase):
+    def test_local_rule_id_does_not_depend_on_the_runner_path(self):
+        report = {"results": [{"check_id": "home.runner.work._temp..gate.rules.gate.child-process-exec-nonliteral",
+                               "path": "routes/x.ts", "start": {"line": 3}, "extra": {"severity": "ERROR"}}]}
+        self.assertEqual(gate.normalize_semgrep(report)[0]["rule_id"], "gate.child-process-exec-nonliteral")
+
+    def test_registry_rule_id_is_unchanged(self):
+        rid = "javascript.sequelize.security.audit.sequelize-injection-express.express-sequelize-injection"
+        report = {"results": [{"check_id": rid, "path": "a.ts", "start": {"line": 1}, "extra": {}}]}
+        self.assertEqual(gate.normalize_semgrep(report)[0]["rule_id"], rid)
+
+
 class InlineSuppression(unittest.TestCase):
     PATCH = (
         "diff --git a/routes/x.ts b/routes/x.ts\n"
@@ -55,6 +67,10 @@ class InlineSuppression(unittest.TestCase):
         found = gate.inline_suppressions(self.PATCH)
         self.assertEqual(len(found), 1)
         self.assertEqual((found[0]["file"], found[0]["line"]), ("routes/x.ts", 11))
+
+    def test_documentation_that_names_a_suppression_is_not_flagged(self):
+        doc = self.PATCH.replace("routes/x.ts", "README.md")
+        self.assertEqual(gate.inline_suppressions(doc), [])
 
     def test_removed_lines_are_not_flagged(self):
         self.assertEqual(gate.inline_suppressions(self.PATCH.replace("+eval", "-eval")), [])

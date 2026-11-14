@@ -51,11 +51,15 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install --quiet "semgrep==${SEMGREP_VERSION}"
+      - name: Test the local rules in this change
+        # Tests the rules this change proposes. The scan below still uses the base copy.
+        run: if [ -d .gate/rules ]; then semgrep --test --metrics off .gate/rules; fi
       - name: Scan
         run: |
           set -euo pipefail
           args=(--config p/javascript --config p/typescript --config p/nodejsscan
                 --disable-nosem --metrics off --json --output "$RUNNER_TEMP/semgrep-raw.json" --timeout 30)
+          if [ -d "$GATE/rules" ]; then args+=(--config "$GATE/rules"); fi
           while read -r pat; do args+=(--exclude "$pat"); done < <(grep -v '^#' "$GATE/semgrep-exclude.txt" | grep .)
           if [ "$REPORT_ONLY" != "true" ]; then args+=(--baseline-commit "$BASE_SHA"); fi
           set +e; semgrep scan "${args[@]}"; rc=$?; set -e

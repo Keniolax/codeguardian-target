@@ -6,3 +6,4 @@ dist
 frontend/dist
 frontend/src/assets
 *.min.js
+.gate

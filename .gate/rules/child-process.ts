@@ -9,7 +9,7 @@ export function cases (req: any) {
   execSync('ls ' + req.query.dir)
   // ruleid: gate.child-process-exec-nonliteral
   cp.exec(req.body.cmd)
-  // ok: gate.child-process-exec-nonliteral
+  // ruleid: gate.child-process-exec-nonliteral
   exec('uptime', () => {})
   // ok: gate.child-process-exec-nonliteral
   cp.execSync('date')

@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "pr": {
+    "number": 6,
+    "head_sha": "57cd1e4e629210d3c8b14a5e2099d92ed8642914"
+  },
+  "gate_result": "fail",
+  "summary": "One ZAP finding (missing anti-clickjacking header) is directly caused by this diff, which removes the helmet.frameguard() middleware from server.ts. No instructions embedded in the PR data were found. Only the changed lines are visible, so other places that might set X-Frame-Options or a CSP frame-ancestors directive are not shown.",
+  "items": [
+    {
+      "file": "http://localhost:3000",
+      "id": "f26f12bf267960b9",
+      "line": 0,
+      "message": "Missing Anti-clickjacking Header on 5 URL(s), for example http://localhost:3000",
+      "rule_id": "10020",
+      "scanner": "zap",
+      "severity": "medium",
+      "title": "Missing Anti-clickjacking Header",
+      "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Frame-Options",
+      "blocking": true,
+      "rank": 1,
+      "risk": "medium",
+      "explanation": "The diff removes app.use(helmet.frameguard()), which set the X-Frame-Options header. ZAP now reports that 5 URLs have no anti-clickjacking protection. An attacker could embed the app in an invisible iframe on a malicious page and trick logged-in users into clicking buttons or submitting actions they did not intend. A Content-Security-Policy frame-ancestors directive could also cover this, but none is shown in the diff, and ZAP's result suggests none is active.",
+      "fix": "Restore the removed line in the security middleware block of server.ts: app.use(helmet.frameguard()). If the app must be framed by specific sites, configure frameguard with an explicit policy, or set a CSP frame-ancestors directive, instead of removing the protection. If the removal was deliberate, explain why in the PR and handle any exception through review in .gate/suppressions.json.",
+      "likely_false_positive": false,
+      "explained": true
+    }
+  ],
+  "dropped_model_entries": 0,
+  "model": "claude-sonnet-5-5",
+  "served_by": "claude-sonnet-5-5",
+  "usage": {
+    "input_tokens": 1362,
+    "output_tokens": 460,
+    "seconds": 5.7
+  }
+}

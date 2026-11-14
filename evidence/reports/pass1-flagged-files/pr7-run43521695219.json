@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "pr": {
+    "number": 7,
+    "head_sha": "13a31095d7d9ef8b6d020b38fd664e458852553e"
+  },
+  "gate_result": "fail",
+  "summary": "The new lookupUsers route builds a raw SQL query by concatenating the email query parameter, and the developer silenced the scanner with an inline nosemgrep comment that claims a length limit makes it safe. It does not. Both findings point at the same line and the same real problem. No instructions were found embedded in the PR data.",
+  "items": [
+    {
+      "file": "routes/userLookup.ts",
+      "id": "b4dcc75489b14364",
+      "line": 14,
+      "message": "Detected a sequelize statement that is tainted by user-input. This could lead to SQL injection if the variable is user-controlled and is not properly sanitized. In order to prevent SQL injection, it is recommended to use parameterized queries or prepared statements.",
+      "rule_id": "javascript.sequelize.security.audit.sequelize-injection-express.express-sequelize-injection",
+      "scanner": "semgrep",
+      "severity": "high",
+      "title": "express-sequelize-injection",
+      "url": "https://sequelize.org/docs/v6/core-concepts/raw-queries/#replacements",
+      "blocking": true,
+      "rank": 1,
+      "risk": "critical",
+      "explanation": "The email query parameter is placed directly into a SQL string. An attacker can close the quote and add their own SQL. The 100 character limit does not stop this, since a short payload such as a UNION SELECT is enough to read other tables, including password hashes, from the Users table or others. The endpoint has no visible authentication check, which makes it easier to reach. This is a true positive.",
+      "fix": "Use bound parameters: models.sequelize.query('SELECT id, email, createdAt FROM Users WHERE email LIKE :frag AND deletedAt IS NULL', { replacements: { frag: '%' + fragment + '%' }, type: QueryTypes.SELECT }). Also escape LIKE wildcards if needed, and require an authenticated support role on the route.",
+      "likely_false_positive": false,
+      "explained": true
+    },
+    {
+      "file": "routes/userLookup.ts",
+      "id": "74ad3da8187445c6",
+      "line": 14,
+      "message": "The change adds 'nosemgrep'. Suppressions belong in .gate/suppressions.json with a reason, where review can see them.",
+      "rule_id": "inline-suppression",
+      "scanner": "gate",
+      "severity": "high",
+      "title": "Inline scanner suppression",
+      "url": "",
+      "blocking": true,
+      "rank": 2,
+      "risk": "high",
+      "explanation": "The nosemgrep comment hides the SQL injection warning from the scanner, and its stated reason (input is length-limited) is wrong, because short inputs can still exploit injection. This hides a real vulnerability from reviewers and future scans. The gate flag is valid, but it is a symptom: fixing the injection removes the need for any suppression.",
+      "fix": "Remove the nosemgrep comment and fix the query with bound parameters. If a suppression is ever truly justified, record it with a reason in .gate/suppressions.json so reviewers can see it.",
+      "likely_false_positive": false,
+      "explained": true
+    }
+  ],
+  "dropped_model_entries": 0,
+  "model": "claude-sonnet-5-5",
+  "served_by": "claude-sonnet-5-5",
+  "usage": {
+    "input_tokens": 1654,
+    "output_tokens": 636,
+    "seconds": 6.1
+  }
+}

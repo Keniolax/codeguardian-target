@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "pr": {
+    "number": 5,
+    "head_sha": "73cde536e2ff44a2f81d0d2bfc5e64e9364e46da"
+  },
+  "gate_result": "fail",
+  "summary": "One Trivy finding. The diff removes the USER 65532 line and the chown on the COPY, so the final image now runs as root. The scanner finding is real and was introduced by this change. No injected instructions were found in the PR data.",
+  "items": [
+    {
+      "file": "Dockerfile",
+      "id": "472727e0ed166542",
+      "line": 0,
+      "message": "Specify at least 1 USER command in Dockerfile with non-root user as argument",
+      "rule_id": "DS-0002",
+      "scanner": "trivy",
+      "severity": "high",
+      "title": "Image user should not be 'root'",
+      "url": "https://avd.aquasec.com/misconfig/ds-0002",
+      "blocking": true,
+      "rank": 1,
+      "risk": "high",
+      "explanation": "The Dockerfile no longer sets a non-root user. This PR deletes the USER 65532 line and the --chown on the COPY, so the app now runs as root inside the container. If an attacker exploits a flaw in the app (this is a deliberately vulnerable app, so that is likely), they get root in the container. That makes it easier to modify files, install tools, and attempt a container escape or abuse mounted volumes.",
+      "fix": "Restore the removed lines: use COPY --from=installer --chown=65532:0 /juice-shop . and add USER 65532 before EXPOSE and CMD. If the change was made to fix a permissions problem, fix the file ownership instead of running as root.",
+      "likely_false_positive": false,
+      "explained": true
+    }
+  ],
+  "dropped_model_entries": 0,
+  "model": "claude-sonnet-5-5",
+  "served_by": "claude-sonnet-5-5",
+  "usage": {
+    "input_tokens": 1241,
+    "output_tokens": 353,
+    "seconds": 4.6
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "pr": {
+    "number": 3,
+    "head_sha": "17e5f8e653ca8959f5ac014e2e3d3436eb31c72d"
+  },
+  "gate_result": "fail",
+  "summary": "One finding: a full PKCS#8 private key is hardcoded in lib/partnerSigning.ts and used to sign order exports for a delivery partner. No injected instructions were found in the PR data. The repo header suggests OWASP Juice Shop, a deliberately vulnerable training app, so the key may be a dummy. Verify that before dismissing it.",
+  "items": [
+    {
+      "file": "lib/partnerSigning.ts",
+      "id": "d10f4e12e97954ae",
+      "line": 7,
+      "message": "Identified a Private Key, which may compromise cryptographic security and sensitive data encryption. committed in 17e5f8e653ca",
+      "rule_id": "private-key",
+      "scanner": "gitleaks",
+      "severity": "high",
+      "title": "Identified a Private Key, which may compromise cryptographic security and sensitive data encryption.",
+      "url": "",
+      "blocking": true,
+      "rank": 1,
+      "risk": "high",
+      "explanation": "A complete RSA private key is committed in source code and exported as partnerSigningKey. Anyone with repository read access, including forks and clones, can copy it and forge signatures on order exports. The partner would then trust fake or tampered data. Because the key is in git history, deleting the line does not remove the exposure.",
+      "fix": "If this key is real, treat it as compromised: generate a new key pair, give the partner the new public key, and revoke the old one. Load the private key at runtime from a secret manager or an environment variable, never from source. Purge it from git history if needed. If it is a dummy key for tests or a training app, move it to a clearly named test fixture and add a Gitleaks allowlist entry.",
+      "likely_false_positive": false,
+      "explained": true
+    }
+  ],
+  "dropped_model_entries": 0,
+  "model": "claude-sonnet-5-5",
+  "served_by": "claude-sonnet-5-5",
+  "usage": {
+    "input_tokens": 2889,
+    "output_tokens": 401,
+    "seconds": 4.5
+  }
+}

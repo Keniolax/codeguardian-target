@@ -43,7 +43,11 @@ jobs:
       - name: Load gate files from the base commit
         run: |
           set -euo pipefail
-          if [ "$REPORT_ONLY" = "true" ]; then echo "BASE_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"; BASE_SHA=$(git rev-parse HEAD); fi
+          if [ "$REPORT_ONLY" = "true" ]; then BASE_SHA=$(git rev-parse HEAD); fi
+          # pull_request.base.sha goes stale when main moves, but the checkout is the merge
+          # commit, so judge against its first parent: the main the merge was built on.
+          if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then BASE_SHA=$(git rev-parse HEAD^1); fi
+          echo "BASE_SHA=$BASE_SHA" >> "$GITHUB_ENV"
           git archive "$BASE_SHA" .gate | tar -x -C "$RUNNER_TEMP"
           test -f "$RUNNER_TEMP/.gate/gate.py"
           echo "GATE=$RUNNER_TEMP/.gate" >> "$GITHUB_ENV"
@@ -84,7 +88,11 @@ jobs:
       - name: Load gate files from the base commit
         run: |
           set -euo pipefail
-          if [ "$REPORT_ONLY" = "true" ]; then echo "BASE_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"; BASE_SHA=$(git rev-parse HEAD); fi
+          if [ "$REPORT_ONLY" = "true" ]; then BASE_SHA=$(git rev-parse HEAD); fi
+          # pull_request.base.sha goes stale when main moves, but the checkout is the merge
+          # commit, so judge against its first parent: the main the merge was built on.
+          if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then BASE_SHA=$(git rev-parse HEAD^1); fi
+          echo "BASE_SHA=$BASE_SHA" >> "$GITHUB_ENV"
           git archive "$BASE_SHA" .gate | tar -x -C "$RUNNER_TEMP"
           test -f "$RUNNER_TEMP/.gate/gate.py"
           echo "GATE=$RUNNER_TEMP/.gate" >> "$GITHUB_ENV"
@@ -127,7 +135,11 @@ jobs:
       - name: Load gate files from the base commit
         run: |
           set -euo pipefail
-          if [ "$REPORT_ONLY" = "true" ]; then echo "BASE_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"; BASE_SHA=$(git rev-parse HEAD); fi
+          if [ "$REPORT_ONLY" = "true" ]; then BASE_SHA=$(git rev-parse HEAD); fi
+          # pull_request.base.sha goes stale when main moves, but the checkout is the merge
+          # commit, so judge against its first parent: the main the merge was built on.
+          if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then BASE_SHA=$(git rev-parse HEAD^1); fi
+          echo "BASE_SHA=$BASE_SHA" >> "$GITHUB_ENV"
           git archive "$BASE_SHA" .gate | tar -x -C "$RUNNER_TEMP"
           test -f "$RUNNER_TEMP/.gate/gate.py"
           echo "GATE=$RUNNER_TEMP/.gate" >> "$GITHUB_ENV"
@@ -170,7 +182,11 @@ jobs:
       - name: Load gate files from the base commit
         run: |
           set -euo pipefail
-          if [ "$REPORT_ONLY" = "true" ]; then echo "BASE_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"; BASE_SHA=$(git rev-parse HEAD); fi
+          if [ "$REPORT_ONLY" = "true" ]; then BASE_SHA=$(git rev-parse HEAD); fi
+          # pull_request.base.sha goes stale when main moves, but the checkout is the merge
+          # commit, so judge against its first parent: the main the merge was built on.
+          if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then BASE_SHA=$(git rev-parse HEAD^1); fi
+          echo "BASE_SHA=$BASE_SHA" >> "$GITHUB_ENV"
           git archive "$BASE_SHA" .gate | tar -x -C "$RUNNER_TEMP"
           test -f "$RUNNER_TEMP/.gate/gate.py"
           echo "GATE=$RUNNER_TEMP/.gate" >> "$GITHUB_ENV"
@@ -234,7 +250,11 @@ jobs:
       - name: Load gate files from the base commit
         run: |
           set -euo pipefail
-          if [ "$REPORT_ONLY" = "true" ]; then echo "BASE_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"; BASE_SHA=$(git rev-parse HEAD); fi
+          if [ "$REPORT_ONLY" = "true" ]; then BASE_SHA=$(git rev-parse HEAD); fi
+          # pull_request.base.sha goes stale when main moves, but the checkout is the merge
+          # commit, so judge against its first parent: the main the merge was built on.
+          if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then BASE_SHA=$(git rev-parse HEAD^1); fi
+          echo "BASE_SHA=$BASE_SHA" >> "$GITHUB_ENV"
           git archive "$BASE_SHA" .gate | tar -x -C "$RUNNER_TEMP"
           test -f "$RUNNER_TEMP/.gate/gate.py"
           echo "GATE=$RUNNER_TEMP/.gate" >> "$GITHUB_ENV"

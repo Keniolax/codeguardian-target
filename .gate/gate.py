@@ -70,9 +70,16 @@ SEMGREP_SEVERITY = {"ERROR": "high", "WARNING": "medium", "INFO": "info",
                     "CRITICAL": "critical", "HIGH": "high", "MEDIUM": "medium", "LOW": "low"}
 
 
+LOCAL_RULE_PREFIX = re.compile(r"^.*?\.gate\.rules\.")
+
+
 def normalize_semgrep(report):
+    """Semgrep prefixes local rule IDs with their directory path (for example
+    home.runner.work._temp..gate.rules.gate.x). Strip it, so a rule ID is the same on every
+    runner and a suppression can match it."""
     out = []
     for r in report.get("results", []):
+        r = dict(r, check_id=LOCAL_RULE_PREFIX.sub("", r["check_id"]))
         extra = r.get("extra", {})
         meta = extra.get("metadata", {}) or {}
         refs = meta.get("references") or []

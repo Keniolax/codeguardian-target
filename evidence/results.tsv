@@ -1,0 +1,16 @@
+pr	branch	expected_scanner	gate_run	gate_result	blocking_rule
+1	seed/s1-sqli-user-lookup	semgrep	43520633725	fail	express-sequelize-injection
+1	seed/s1-sqli-user-lookup (fix commit 8fe16f5)	none	43522012489	pass	
+2	seed/s2-cmdi-host-check	semgrep	43520666260	pass	(missed)
+2	seed/s2-cmdi-host-check (after #13)	semgrep	see PR #2 checks	fail	gate.child-process-exec-nonliteral
+3	seed/g1-partner-signing-key	gitleaks	43520695507	fail	private-key
+4	seed/t1-node-serialize	trivy	43520704705	fail	CVE-2017-5941, NSWG-ECO-311
+5	seed/t2-dockerfile-root	trivy	43520732052	fail	DS-0002
+6	seed/z1-drop-frameguard	zap	43520737793	fail	10020
+7	seed/x1-inline-nosemgrep	semgrep+gate	43520815811	fail	express-sequelize-injection, inline-suppression
+8	seed/x2-self-suppression	semgrep+config-guard	43520822329	fail	express-sequelize-injection
+9	control/c1-readme	none	43520848938	pass	
+10	control/c2-search-comments	none	43520854618	pass	
+11	control/c3-dockerfile-comment	none	43520859716	pass	
+12	seed/s2b-cmdi-plain-import	semgrep	43521985696	pass	(missed)
+-	main, full scan, report only	all	43519391853	report-only	311 pre-existing findings

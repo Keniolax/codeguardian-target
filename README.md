@@ -1,3 +1,75 @@
+# Security gate on OWASP Juice Shop
+
+This repository holds OWASP Juice Shop v20.3.0, which is vulnerable by design, as the
+target of a pull-request security gate. The gate is the project. The app is only the test
+subject. Do not deploy it anywhere public. The upstream Juice Shop README follows below.
+
+## What it does
+
+Every pull request to `main` runs four scanners in GitHub Actions:
+
+| Scanner | Kind | What it judges |
+|---|---|---|
+| Semgrep 1.183.0 | SAST | source code, with `--baseline-commit` and `--disable-nosem` |
+| Gitleaks 8.30.1 | secrets | only the commits the pull request adds |
+| Trivy 0.76.1 | SCA and config | lockfiles and Dockerfile, base and head scanned with one database |
+| ZAP 2.17.0 | DAST | passive baseline scan of the app built from the pull request |
+
+The `gate` job then fails the pull request if it adds a finding at or above the blocking
+severity, if any scanner did not run, if it adds an inline suppression (`nosemgrep`,
+`gitleaks:allow`, `trivy:ignore`), or if it edits a scanner's own config file. The gate code,
+ignore lists and suppressions in `.gate/` are always read from the base commit, so a pull
+request cannot change the rules that judge it. Every suppression in
+`.gate/suppressions.json` needs a reason of at least 20 characters.
+
+After the gate, [CodeGuardian](https://github.com/Keniolax/codeguardian) explains and ranks
+the findings in one pull-request comment, and sets a second required status,
+`codeguardian/config-guard`, which fails when a pull request edits `.github/` or `.gate/`.
+That status comes from a workflow on `main`, which the pull request cannot edit.
+
+Pins: Actions by commit SHA, scanner binaries by release sha256, ZAP by image digest, all
+releases at least 14 days old.
+
+## How to run it
+
+- Open a pull request against `main`. The `security-gate` workflow runs on its own.
+- Full scan of `main`, report only: run the `security-gate` workflow by hand
+  (`gh workflow run security-gate.yml`).
+- Gate unit tests: `python3 -m unittest discover -s .gate -v`.
+
+## What was learned
+
+Results, measured on 13 pull requests in this repository (gate runs about 5.5 minutes,
+most of it building the app for ZAP):
+
+| PR | Change | Expected | Result |
+|---|---|---|---|
+| [#1](../../pull/1) | SQL injection in a new route, then the fix | Semgrep | blocked (run 43520633725), fix passed (run 43522012489), merged |
+| [#2](../../pull/2), [#12](../../pull/12) | command injection, `exec()` built from `req.query` | Semgrep | **passed** with both import forms; blocked after the local rule in [#13](../../pull/13) |
+| [#3](../../pull/3) | private key in source (throwaway, never used) | Gitleaks | blocked |
+| [#4](../../pull/4) | node-serialize 0.0.4 (CVE-2017-5941) | Trivy | blocked |
+| [#5](../../pull/5) | container runs as root | Trivy | blocked (DS-0002) |
+| [#6](../../pull/6) | `helmet.frameguard()` removed | ZAP | blocked (10020) |
+| [#7](../../pull/7) | SQL injection hidden with `// nosemgrep` | Semgrep + gate | blocked twice |
+| [#8](../../pull/8) | SQL injection plus its own suppression | Semgrep + config-guard | blocked; suppression ignored |
+| [#9](../../pull/9)–[#11](../../pull/11) | docs; comments that shift lines above old findings | none | all passed |
+
+- A gate that judges the whole tree is switched off within a week. Untouched Juice Shop
+  has 311 findings (Semgrep 73, Gitleaks 69, Trivy 160, ZAP 9). Judge the change against
+  its base, and read every rule and ignore list from the base.
+- Scanners read their own config from the code they scan (`.gitleaks.toml`, `trivy.yaml`,
+  `.trivyignore`, `.semgrepignore`, `nosemgrep`). Left alone, a pull request can switch its
+  own scanner off. #7 and #8 try it.
+- A `pull_request` workflow runs the pull request's own copy of the workflow, so the change
+  can rewrite its judge. Only a check that runs from `main` (`config-guard`) closes that.
+- A green scan is not proof. The registry rules missed a plain command injection (#2); a
+  local rule with its own `semgrep --test` cases closed the gap.
+- Matching old against new findings must survive line shifts. Trivy findings keyed by line
+  made a comment look like a new finding until they were matched by count (#11).
+- A gate that cannot run must fail. When scanner jobs were cancelled, the gate failed.
+
+---
+
 # ![Juice Shop Logo](https://raw.githubusercontent.com/juice-shop/juice-shop/master/frontend/src/assets/public/images/JuiceShop_Logo_100px.png) OWASP Juice Shop
 
 [![OWASP Flagship](https://img.shields.io/badge/owasp-flagship%20project-48A646.svg)](https://owasp.org/projects/#sec-flagships)

@@ -22,6 +22,19 @@ class TrivyDiff(unittest.TestCase):
     def test_nothing_new_means_nothing_reported(self):
         self.assertEqual(gate.normalize_trivy(trivy_report("CVE-1"), trivy_report("CVE-1")), [])
 
+    def test_line_shift_does_not_make_a_misconfiguration_new(self):
+        def mis(line):
+            return {"Results": [{"Target": "Dockerfile", "Misconfigurations": [
+                {"ID": "DS026", "Status": "FAIL", "Severity": "LOW", "CauseMetadata": {"StartLine": line}}]}]}
+        self.assertEqual(gate.normalize_trivy(mis(9), mis(3)), [])
+
+    def test_extra_instance_of_a_check_is_new(self):
+        one = {"Results": [{"Target": "Dockerfile", "Misconfigurations": [
+            {"ID": "DS002", "Status": "FAIL", "Severity": "HIGH"}]}]}
+        two = {"Results": [{"Target": "Dockerfile", "Misconfigurations": [
+            {"ID": "DS002", "Status": "FAIL", "Severity": "HIGH"}] * 2}]}
+        self.assertEqual(len(gate.normalize_trivy(two, one)), 1)
+
     def test_passed_misconfiguration_is_ignored(self):
         head = {"Results": [{"Target": "Dockerfile", "Misconfigurations": [
             {"ID": "DS002", "Status": "PASS", "Severity": "HIGH"}]}]}

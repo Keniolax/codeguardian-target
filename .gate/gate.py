@@ -117,19 +117,29 @@ def trivy_items(report):
             if m.get("Status") != "FAIL":
                 continue
             line = (m.get("CauseMetadata") or {}).get("StartLine", 0)
-            key = ("misconfig", target, m.get("ID"), line)
+            # No line in the key: a change that shifts lines must not turn old findings new.
+            key = ("misconfig", target, m.get("ID"))
             yield key, finding("trivy", m.get("ID", ""), m.get("Severity", "UNKNOWN").lower(), target,
                                line, m.get("Title", ""), m.get("Message", ""), m.get("PrimaryURL", ""))
 
 
 def normalize_trivy(head, base):
-    """Keep only what head adds. Both scans ran in one job with one database."""
-    base_keys = {k for k, _ in trivy_items(base)}
+    """Keep only what head adds. Both scans ran in one job with one database.
+
+    Keys are counted, not just compared: if the base has a check failing twice in a file
+    and the head has it three times, one finding is new.
+    """
+    remaining = {}
+    for k, _ in trivy_items(base):
+        remaining[k] = remaining.get(k, 0) + 1
     seen, out = set(), []
     for k, f in trivy_items(head):
-        if k in base_keys or k in seen:
-            continue
+        if k[0] == "vuln" and k in seen:
+            continue  # one package version can be listed under several targets
         seen.add(k)
+        if remaining.get(k, 0) > 0:
+            remaining[k] -= 1
+            continue
         out.append(f)
     return out
 

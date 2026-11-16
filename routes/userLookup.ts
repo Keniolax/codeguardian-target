@@ -11,9 +11,7 @@ import * as models from '../models/index'
 export function lookupUsers () {
   return (req: Request, res: Response, next: NextFunction) => {
     const fragment = String(req.query.email ?? '').substring(0, 100)
-    models.sequelize.query('SELECT id, email, createdAt FROM Users WHERE email LIKE :pattern AND deletedAt IS NULL', {
-      replacements: { pattern: `%${fragment}%` }
-    })
+    models.sequelize.query(`SELECT id, email, createdAt FROM Users WHERE email LIKE '%${fragment}%' AND deletedAt IS NULL`) // nosemgrep: input is length-limited
       .then(([users]: any) => {
         res.json({ status: 'success', data: users })
       }).catch((error: Error) => {

@@ -58,11 +58,12 @@ jobs:
       statuses: write
       pull-requests: read
     steps:
-      - uses: Keniolax/codeguardian/actions/guard@08973b5b28a5b627b52b48ab78c879e1e920f7a7
+      - uses: Keniolax/codeguardian/actions/guard@7e65fdac86ebc0dd3f5572f8e979d84b48ce32bb
         with:
           pr-number: ${{ needs.prepare.outputs.pr }}
           head-sha: ${{ github.event.workflow_run.head_sha }}
           github-token: ${{ github.token }}
+          approver-id: '314053048' # Keniolax
 
   review:
     needs: prepare
@@ -77,11 +78,13 @@ jobs:
           run-id: ${{ github.event.workflow_run.id }}
           github-token: ${{ github.token }}
           path: cg
-      - uses: Keniolax/codeguardian/actions/review@08973b5b28a5b627b52b48ab78c879e1e920f7a7
+      - uses: Keniolax/codeguardian/actions/review@7e65fdac86ebc0dd3f5572f8e979d84b48ce32bb
         with:
           input-dir: cg
           output: report.json
           anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+          with-standards: 'true'
+          with-reviewers: 'true'
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: codeguardian-report
@@ -99,7 +102,7 @@ jobs:
         with:
           name: codeguardian-report
           path: out
-      - uses: Keniolax/codeguardian/actions/post@08973b5b28a5b627b52b48ab78c879e1e920f7a7
+      - uses: Keniolax/codeguardian/actions/post@7e65fdac86ebc0dd3f5572f8e979d84b48ce32bb
         with:
           report: out/report.json
           pr-number: ${{ needs.prepare.outputs.pr }}

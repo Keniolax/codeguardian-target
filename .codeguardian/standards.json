@@ -1,0 +1,3 @@
+{
+  "trivy:DS-0002": "Platform decision PLAT-88: the base image drops privileges at start, so a root USER is approved here. Treat DS-0002 as a false positive with risk info."
+}
